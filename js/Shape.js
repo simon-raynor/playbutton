@@ -1,4 +1,4 @@
-import { multMatrices3x3 } from './utils.js';
+import { multMatrices3x3, dotProduct, crossProduct } from './utils.js';
 
 export default function Shape( initialPoints ) {
 	
@@ -206,7 +206,62 @@ Shape.prototype.matrixRotate	= function( matrix ) {
 		
 	}
 	
-	return	matrix;
+	return	this.flat;
+	
+}
+
+Shape.prototype.quaternionRotate	= function( quat ) {
+	
+	const	[ cx
+			, cy
+			, cz ]	= this.centre;
+	
+	const	[ qt
+			, qx
+			, qy
+			, qz ]	= quat;
+	
+	// get the inverse quaternion
+	const	qsize	= Math.sqrt( ( qt * qt ) + ( qx * qx ) + ( qy * qy ) + ( qz * qz ) ),
+			qsize2	= qsize * qsize,
+			[ q1t
+			, q1x
+			, q1y
+			, q1z ]	= [ qt / qsize2, -qx / qsize2, -qy / qsize2, -qz / qsize2 ];
+	
+	const	cosT	= Math.cos( qt ),
+			sinT	= Math.sin( qt );
+	
+	let pt, px, py, pz;
+	
+	
+	for (
+		let	n = this.flat.length,
+			i = 0;
+		i < n;
+		i += 3
+	) {
+		
+		pt	= 0;
+		px	= this.flat[ i ] - cx;
+		py	= this.flat[ i + 1 ] - cy;
+		pz	= this.flat[ i + 2 ] - cz;
+		
+		const	[ st
+				, sx
+				, sy
+				, sz ]	= [
+							( qt * pt ) - ( qx * px ) - ( qy * py ) - ( qz * pz ),
+							( qt * px ) + ( qx * pt ) + ( qy * pz ) - ( qz * py ),
+							( qt * py ) - ( qx * pz ) + ( qy * pt ) + ( qz * px ),
+							( qt * pz ) + ( qx * py ) - ( qy * px ) + ( qz * pt )
+						];
+		
+		this.flat[ i ]		= cx + ( ( st * q1x ) + ( sx * q1t ) + ( sy * q1z ) - ( sz * q1y ) );
+		this.flat[ i + 1 ]	= cy + ( ( st * q1y ) - ( sx * q1z ) + ( sy * q1t ) + ( sz * q1x ) );
+		this.flat[ i + 2 ]	= cz + ( ( st * q1z ) + ( sx * q1y ) - ( sy * q1x ) + ( sz * q1t ) );
+		
+	}
 	
 }
 

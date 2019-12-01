@@ -64,7 +64,7 @@ export function animate( tickFn, time = 10000 ) {
 			
 			dt	= Math.max( dt - now, 0 );
 			
-			tTot	+= dt;
+			tTot	= dt;
 			
 			t	= tTot / time;
 			
@@ -129,6 +129,35 @@ export function animateBounce( tickFn, time = 10000, bounciness ) {
 	
 }
 
+
+export function elasticTiming( t, extent = 1.125 ) {
+	
+	const	ext1	= extent - 1;
+	
+	let	ret;
+	
+	if ( t < 0.5 ) {
+		
+		ret	= extent * Math.sin( Math.PI * t );
+		
+	} else if ( t < 0.667 ) {
+		
+		ret	= 1 + ( ext1 * Math.cos( Math.PI * ( t - 0.5 ) * 3 ) );
+		
+	} else if ( t < 0.833 ) {
+		
+		ret	= 1 + ( 0.5 * ext1 * Math.cos( Math.PI * ( t - 0.5 ) * 3 ) );
+		
+	} else {
+		
+		ret	= 1 + ( 0.25 * ext1 * Math.cos( Math.PI * ( t - 0.5 ) * 3 ) );
+		
+	}
+	
+	console.log( t, ret );
+	return	ret;
+	
+}
 
 
 

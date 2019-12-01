@@ -71,3 +71,46 @@ export function multMatrices3x3( a, b ) {
 	];
 	
 };
+
+export function dotProduct( v1, v2 ) {
+	
+	let shorter, longer, length;
+	
+	if ( v1.length >= v2.length ) {
+		
+		shorter	= v2;
+		longer	= v1;
+		length	= v1.length;
+		
+	} else {
+		
+		shorter	= v1;
+		longer	= v2;
+		length	= v2.length;
+		
+	}
+	
+	let	tot	= 0,
+		idx	= 0;
+	
+	for ( idx; idx < length; idx++ ) {
+		
+		tot	+= val * ( shorter[ idx ] || 0 );
+		
+	}
+	
+	return	tot;
+	
+}
+
+export function crossProduct( a, b ) {
+	
+	// TODO	sanitise input
+	
+	return	[
+				( a[ 1 ] * b[ 2 ] ) - ( a[ 2 ] * b[ 1 ] ),
+				( a[ 2 ] * b[ 0 ] ) - ( a[ 0 ] * b[ 2 ] ),
+				( a[ 0 ] * b[ 1 ] ) - ( a[ 1 ] * b[ 1 ] )
+			];
+	
+}

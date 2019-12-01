@@ -1,7 +1,11 @@
 import { getWindowDimensions, multMatrices3x3 } from './utils.js';
 import Shape from './Shape.js';
 import solids from './solid-defs.js';
-import { animateBasic, animate } from './animate.js';
+import { animateBasic, animate, bouncyTiming, elasticTiming } from './animate.js';
+
+
+let	spinning	= false,
+	flat		= null;
 
 
 document.addEventListener( 'DOMContentLoaded', evt => {
@@ -22,14 +26,18 @@ document.addEventListener( 'DOMContentLoaded', evt => {
 	canvas.style.borderRadius	= "50%";
 	
 	
-	const	shape	= new Shape( solids.tetrahedron );
+	const	shape	= new Shape(
+						solids.trianglePrism1
+						//solids.tetrahedron
+						//solids.icosahedron
+					);
 	
 	shape.scale( 100 );
 	shape.translate( [ 0, 0, 1000 ] );
 	
-	drawShape( shape, { ctx, centre: min / 10 } );
+	flat	= shape.flat.slice();
 	
-	let	spinning	= false;
+	drawShape( shape, { ctx, centre: min / 10 } );
 	
 	const	offsetX	= canvas.offsetLeft,
 			offsetY	= canvas.offsetTop,
@@ -37,67 +45,7 @@ document.addEventListener( 'DOMContentLoaded', evt => {
 			cx		= min / 10,
 			cy		= min / 10;
 	
-	canvas.addEventListener( 'pointermove', evt => {
-		
-		if ( ! spinning ) {
-			
-			const	x	= ( ( evt.pageX - offsetX ) - cx ),
-					y	= ( cy - ( evt.pageY - offsetY ) );
-			
-			const	[ nx
-					, ny ]	= getNormalisedVector(
-								evt, 
-								canvas.offsetLeft,
-								canvas.offsetTop,
-								min / 10,
-								min / 10
-							);
-			
-			const	matrix	= getRotationMatrix( nx, ny, evt.pressure ? 0.4 : 0.2 );
-			
-			const	flat	= shape.flat.slice();
-			
-			shape.matrixRotate( matrix );
-			
-			drawShape( shape, { ctx, centre: min / 10 } );
-			
-			shape.flat	= flat;
-			
-		}
-		
-	} );
-	
-	canvas.addEventListener( 'pointerdown', evt => {
-		
-		if ( ! spinning ) {
-			
-			const	x	= ( ( evt.pageX - offsetX ) - cx ),
-					y	= ( cy - ( evt.pageY - offsetY ) );
-			
-			const	[ nx
-					, ny ]	= getNormalisedVector(
-								evt, 
-								canvas.offsetLeft,
-								canvas.offsetTop,
-								min / 10,
-								min / 10
-							);
-			
-			const	matrix	= getRotationMatrix( nx, ny, evt.pressure ? 0.4 : 0.2 );
-			
-			const	flat	= shape.flat.slice();
-			
-			shape.matrixRotate( matrix );
-			
-			drawShape( shape, { ctx, centre: min / 10 } );
-			
-			shape.flat	= flat;
-			
-		}
-		
-	} );
-	
-	canvas.addEventListener( 'pointerup', evt => {
+	canvas.addEventListener( 'click', evt => {
 		
 		if ( ! spinning ) {
 			
@@ -110,39 +58,21 @@ document.addEventListener( 'DOMContentLoaded', evt => {
 								canvas.offsetTop,
 								min / 10,
 								min / 10
-							),
-					
-					matrix	= getRotationMatrix(
-								nx,
-								ny,
-								-0.25
 							);
 			
-			const	flat	= shape.flat.slice();
-			
-			let	n = 0;
-			
-			animateBasic( t => {
+			animate( t => {
 				
-				if ( n++ < 30 ) {
-					
-					shape.matrixRotate( matrix );
-					
-					ctx.clearRect( 0, 0, min / 5, min / 5 );
-					
-					drawShape( shape, { ctx, centre: min / 10 } );
-					
-				} else {
-					
-					shape.flat	= flat;
-					
-					drawShape( shape, { ctx, centre: min / 10 } );
-					
-					return true;
-					
-				}
+				const	theta		= 2 * Math.PI * elasticTiming( t ),
+						sinTheta2	= Math.sin( theta / 2 ),
+						quaternion	= [ Math.cos( theta / 2 ), sinTheta2 * -ny, sinTheta2 * -nx, 0 ]
 				
-			} ).then( t => spinning = false );
+				shape.quaternionRotate( quaternion );
+				
+				drawShape( shape, { ctx, centre: min / 10 } );
+				
+				shape.flat	= flat.slice();
+				
+			}, 1000 ).then( t => spinning = false );
 			
 		}
 		
@@ -158,47 +88,6 @@ function getNormalisedVector( evt, offsetX, offsetY, cx, cy ) {
 			mag	= Math.sqrt( ( x * x ) + ( y * y ) );
 	
 	return	[ x / mag, y / mag ];
-	
-}
-
-
-function getRotationMatrix( x, y, magnitude = 1 ) {
-	
-	const	yaw		= x ? Math.atan( x ) * magnitude : 0,
-			pitch	= y ? Math.atan( y ) * magnitude : 0;
-	
-	const	sinP	= Math.sin( pitch ),
-			cosP	= Math.cos( pitch );
-	
-	const	sinY	= Math.sin( yaw ),
-			cosY	= Math.cos( yaw );
-	
-	/*
-	pitch
-	[
-		[ 1, 0, 0 ],
-		[ 0, cosP, -sinP ],
-		[ 0, sinP, cosP ]
-	]
-	yaw
-	[
-		[ cosY, 0, sinY ],
-		[ 0, 1, 0 ],
-		[ -sinY, 0, cosY ]
-	]
-	combined
-	[
-		[ cosY, 0, sinY ],
-		[ sinP * sinY, cosP, -sinP * cosY ],
-		[ -sinY * cosP, sinP, cosP * cosY ]
-	]
-	*/
-	
-	return	[
-				[ cosY, 0, sinY ],
-				[ sinP * sinY, cosP, -sinP * cosY ],
-				[ -sinY * cosP, sinP, cosP * cosY ]
-			];
 	
 }
 

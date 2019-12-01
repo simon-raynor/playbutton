@@ -86,6 +86,47 @@ Object.defineProperty(
 
 Object.defineProperty(
 	solids,
+	'trianglePrism1',
+	{
+		get	: function() {
+			
+			return	[
+				[
+					[ Math.sqrt(8/9), 0, -1/3 ],
+					[ -Math.sqrt(2/9), Math.sqrt(2/3), -1/3 ],
+					[ -Math.sqrt(2/9), -Math.sqrt(2/3), -1/3 ]
+				],
+				[
+					[ Math.sqrt(8/9), 0, 1/3 ],
+					[ -Math.sqrt(2/9), Math.sqrt(2/3), 1/3 ],
+					[ -Math.sqrt(2/9), -Math.sqrt(2/3), 1/3 ]
+				],
+				[
+					[ Math.sqrt(8/9), 0, -1/3 ],
+					[ -Math.sqrt(2/9), Math.sqrt(2/3), -1/3 ],
+					[ -Math.sqrt(2/9), Math.sqrt(2/3), 1/3 ],
+					[ Math.sqrt(8/9), 0, 1/3 ]
+				],
+				[
+					[ -Math.sqrt(2/9), Math.sqrt(2/3), -1/3 ],
+					[ -Math.sqrt(2/9), -Math.sqrt(2/3), -1/3 ],
+					[ -Math.sqrt(2/9), -Math.sqrt(2/3), 1/3 ],
+					[ -Math.sqrt(2/9), Math.sqrt(2/3), 1/3 ]
+				],
+				[
+					[ -Math.sqrt(2/9), -Math.sqrt(2/3), -1/3 ],
+					[ Math.sqrt(8/9), 0, -1/3 ],
+					[ Math.sqrt(8/9), 0, 1/3 ],
+					[ -Math.sqrt(2/9), -Math.sqrt(2/3), 1/3 ]
+				]
+			]
+			
+		}
+	}
+);
+
+Object.defineProperty(
+	solids,
 	'cube',
 	{
 		get	: function() {
