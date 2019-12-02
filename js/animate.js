@@ -146,11 +146,11 @@ export function elasticTiming( t, extent = 1.125 ) {
 		
 	} else if ( t < 0.833 ) {
 		
-		ret	= 1 + ( 0.5 * ext1 * Math.cos( Math.PI * ( t - 0.5 ) * 3 ) );
+		ret	= 1 + ( 0.25 * ext1 * Math.cos( Math.PI * ( t - 0.5 ) * 3 ) );
 		
 	} else {
 		
-		ret	= 1 + ( 0.25 * ext1 * Math.cos( Math.PI * ( t - 0.5 ) * 3 ) );
+		ret	= 1 + ( 0.0625 * ext1 * Math.cos( Math.PI * ( t - 0.5 ) * 3 ) );
 		
 	}
 	
