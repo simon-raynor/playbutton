@@ -25,6 +25,9 @@ document.addEventListener( 'DOMContentLoaded', evt => {
 	canvas.style.border			= '2px solid deeppink';
 	canvas.style.borderRadius	= "50%";
 	
+	const	txt	= document.createElement( 'p' );
+	txt.textContent	= ( min / 5 );
+	document.body.appendChild(txt);
 	
 	const	shape	= new Shape(
 						solids.trianglePrism1
@@ -32,8 +35,8 @@ document.addEventListener( 'DOMContentLoaded', evt => {
 						//solids.icosahedron
 					);
 	
-	shape.scale( 100 );
-	shape.translate( [ 0, 0, 1000 ] );
+	//shape.scale( 100 );
+	shape.translate( [ 0, 0, 10 ] );
 	
 	flat	= shape.flat.slice();
 	
@@ -95,9 +98,9 @@ function getNormalisedVector( evt, offsetX, offsetY, cx, cy ) {
 function drawShape( shape, canvas ) {
 	// TODO	svg output would be easier to style
 	
-	const	proj		= shape.get2dProjection( 400/*650*/ ), // TODO calculate the zoom factor
-			{ ctx
-			, centre }	= canvas;
+	const	{ ctx
+			, centre }	= canvas,
+			proj		= shape.get2dProjection( centre * 2 * 2.5/*650*/ ) // TODO calculate the zoom factor
 	
 	ctx.clearRect( 0, 0, centre * 2, centre * 2 );
 	
