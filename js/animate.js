@@ -154,7 +154,7 @@ export function elasticTiming( t, extent = 1.125 ) {
 		
 	}
 	
-	console.log( t, ret );
+	//tyn,nmjfddxbbbbbbbbbbbbbbbbbbbbbbbbbmkskp8mriconsole.log( t, ret );
 	return	ret;
 	
 }

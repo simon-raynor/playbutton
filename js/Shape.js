@@ -3,7 +3,6 @@ import { multMatrices3x3, dotProduct, crossProduct } from './utils.js';
 export default function Shape( initialPoints ) {
 	
 	this.flat		= [];
-	this._points	= [];
 	this._faces		= [];
 	
 	let	idx	= 0;
@@ -11,25 +10,55 @@ export default function Shape( initialPoints ) {
 	initialPoints.forEach( initFace => {
 		
 		const	ptCount	= initFace.length,
-				face	= [];
+				face	= [],
+				sums	= [0,0,0]
 		
 		initFace.forEach( initPt => {
 			
 			const	point	= [];
 			
-			initPt.forEach( initDatum => {
+			initPt.forEach( ( initDatum, axisIdx ) => {
 				
 				point.push( idx );
 				this.flat.push( initDatum );
+				
+				sums[ axisIdx ]	+= initDatum;
 				
 				idx++;
 				
 			} );
 			
-			this._points.push( point );
 			face.push( point );
 			
 		} );
+		
+		// add the centre & normal now so that transforms
+		// affect those too (save calculating normal each
+		// frame)
+		const	normal	= crossProduct(
+							[
+								this.flat[ face[ 1 ][ 0 ] ] - this.flat[ face[ 0 ][ 0 ] ],
+								this.flat[ face[ 1 ][ 1 ] ] - this.flat[ face[ 0 ][ 1 ] ],
+								this.flat[ face[ 1 ][ 2 ] ] - this.flat[ face[ 0 ][ 2 ] ]
+							],
+							[
+								this.flat[ face[ 2 ][ 0 ] ] - this.flat[ face[ 0 ][ 0 ] ],
+								this.flat[ face[ 2 ][ 1 ] ] - this.flat[ face[ 0 ][ 1 ] ],
+								this.flat[ face[ 2 ][ 2 ] ] - this.flat[ face[ 0 ][ 2 ] ]
+							]
+						);
+		
+		this.flat.push( normal[ 0 ], normal[ 1 ], normal[ 2 ] );
+		face.push([ idx++, idx++, idx++ ]);
+		
+		const	centre	= [
+							sums[ 0 ] / face.length,
+							sums[ 1 ] / face.length,
+							sums[ 2 ] / face.length
+						];
+		
+		this.flat.push( centre[ 0 ], centre[ 1 ], centre[ 2 ] );
+		face.push([ idx++, idx++, idx++ ]);
 		
 		this._faces.push( face );
 		
@@ -38,10 +67,6 @@ export default function Shape( initialPoints ) {
 	this.centre	= findCentre.call( this );
 	
 }
-
-//
-// public methods
-//
 
 Object.defineProperty(
 	Shape.prototype,
@@ -66,6 +91,10 @@ Object.defineProperty(
 		}
 	}
 );
+
+//
+// public methods
+//
 
 Shape.prototype.translate	= function( vector ) {
 	
@@ -265,7 +294,7 @@ Shape.prototype.quaternionRotate	= function( quat ) {
 	
 }
 
-
+/*
 Shape.prototype.get2dProjection	= function( ez = 100) {
 	
 	return	this.faces.map( face => {
@@ -297,6 +326,39 @@ Shape.prototype.get2dProjection	= function( ez = 100) {
 	} ).sort( ( a, b ) => b.z - a.z );
 	
 }
+*/
+Shape.prototype.get2dProjection	= function( ez = 100) {
+	
+	const	returning	= [];
+	
+	this.faces.forEach( face => {
+		
+		const	centre	= face[ face.length - 1 ],
+				normal	= face[ face.length - 2 ];
+		
+		if ( centre[ 2 ] > normal[ 2 ] ) {// backface culling
+			
+			returning.push(
+				face.map( points => {
+					
+					const	[ x, y, z ]	= points;
+					
+					return	[
+						( ez / z ) * x,
+						( ez / z ) * y,
+						z	// keep track of z, it might come in handy I guess
+					];
+					
+				} )
+			);
+			
+		}
+		
+	} );
+	
+	return	returning.sort( ( a, b ) => b[ b.length - 1 ][ 2 ] - a[ a.length - 1 ][ 2 ] );;
+	
+}
 
 
 //
@@ -305,23 +367,23 @@ Shape.prototype.get2dProjection	= function( ez = 100) {
 
 function findCentre() {
 	
-	const	x	= [],
-			y	= [],
-			z	= [],
-			l	= this._points.length;
-	
-	this._points.forEach( pt => {
-		
-		x.push( this.flat[ pt[ 0 ] ] );
-		y.push( this.flat[ pt[ 1 ] ] );
-		z.push( this.flat[ pt[ 2 ] ] );
-		
-	} );
+	const	sums	= this.faces.reduce( ( retval, face ) => {
+						
+						const	fCentre	= face[ face.length - 1 ];
+						
+						return	[
+							retval[ 0 ]	+ fCentre[ 0 ],
+							retval[ 1 ]	+ fCentre[ 1 ],
+							retval[ 2 ]	+ fCentre[ 2 ]
+						];
+						
+					}, [0,0,0] );
 	
 	return	[
-		x.reduce( ( s, n ) => s + n, 0 ) / l,
-		y.reduce( ( s, n ) => s + n, 0 ) / l,
-		z.reduce( ( s, n ) => s + n, 0 ) / l
-	]
+		sums[ 0 ] / this.faces.length,
+		sums[ 1 ] / this.faces.length,
+		sums[ 2 ] / this.faces.length
+	];
 	
 }
+

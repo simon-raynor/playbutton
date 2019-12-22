@@ -25,18 +25,13 @@ document.addEventListener( 'DOMContentLoaded', evt => {
 	canvas.style.border			= '2px solid deeppink';
 	canvas.style.borderRadius	= "50%";
 	
-	const	txt	= document.createElement( 'p' );
-	txt.textContent	= ( min / 5 );
-	document.body.appendChild(txt);
 	
 	const	shape	= new Shape(
 						solids.trianglePrism1
-						//solids.tetrahedron
-						//solids.icosahedron
 					);
 	
-	//shape.scale( 100 );
-	shape.translate( [ 0, 0, 10 ] );
+	shape.scale( 100 );
+	shape.translate( [ 0, 0, 1000 ] );
 	
 	flat	= shape.flat.slice();
 	
@@ -98,15 +93,17 @@ function getNormalisedVector( evt, offsetX, offsetY, cx, cy ) {
 function drawShape( shape, canvas ) {
 	// TODO	svg output would be easier to style
 	
-	const	{ ctx
-			, centre }	= canvas,
-			proj		= shape.get2dProjection( centre * 2 * 2.5/*650*/ ) // TODO calculate the zoom factor
+	const	proj		= shape.get2dProjection( 400/*650*/ ), // TODO calculate the zoom factor
+			{ ctx
+			, centre }	= canvas;
 	
 	ctx.clearRect( 0, 0, centre * 2, centre * 2 );
 	
 	proj.forEach( face => {
 		
-		const	first	= face.shift();
+		const	first	= face.shift(),
+				fCentre	= face.pop(),
+				fNormal	= face.pop();
 		
 		ctx.beginPath();
 		ctx.moveTo( first[ 0 ] + centre, first[ 1 ] + centre );
@@ -127,6 +124,16 @@ function drawShape( shape, canvas ) {
 		ctx.lineJoin	= 'round';
 		ctx.stroke();
 		
+		/*
+		ctx.beginPath();
+		ctx.moveTo( fCentre[ 0 ] + centre, fCentre[ 1 ] + centre );
+		ctx.lineTo( fNormal[ 0 ] + centre, fNormal[ 1 ] + centre );
+		
+		ctx.strokeStyle	= fCentre[ 2 ] > fNormal[ 2 ] ? 'red' : 'blue';//'deepskyblue';
+		ctx.lineWidth	= 1;
+		ctx.lineJoin	= 'round';
+		ctx.stroke();
+		*/
 	} );
 	
 }
